@@ -34,7 +34,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _error = null);
     final success = await ref.read(authProvider.notifier).login(email, pass);
     if (success && mounted) {
-      context.go("/student/dashboard");
+      final user = ref.read(authProvider).user;
+      if (user != null && user.isAdmin) {
+        context.go("/admin/dashboard");
+      } else {
+        context.go("/student/dashboard");
+      }
     } else if (mounted) {
       final authError = ref.read(authProvider).error;
       setState(() => _error = authError ?? "Invalid email or password.");
@@ -69,27 +74,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo & Header
+                // User Brand Logo & Header
                 Center(
-                  child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppColors.primary, AppColors.secondary],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.primary, AppColors.secondary],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: AppRadii.cardStandardRadius,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withOpacity(0.35),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
+                        ),
+                        child: const Icon(LucideIcons.userRound, color: Colors.white, size: 28),
                       ),
-                      borderRadius: AppRadii.cardStandardRadius,
-                    ),
-                    child: const Icon(LucideIcons.code2, color: Colors.white, size: 28),
+                      const SizedBox(height: AppSpacing.space3),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            "CODE",
+                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.textPrimary, letterSpacing: 1),
+                          ),
+                          Text(
+                            "ARENA",
+                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.primaryLight, letterSpacing: 1),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: AppSpacing.space4),
+                const SizedBox(height: AppSpacing.space3),
                 Center(
                   child: Text(
                     "Welcome Back",
-                    style: AppTypography.h1(context, color: AppColors.textPrimary),
+                    style: AppTypography.h2(context, color: AppColors.textPrimary),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.space1),

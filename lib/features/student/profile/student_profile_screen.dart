@@ -39,6 +39,8 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> wit
     _tabController = TabController(length: 3, vsync: this);
     if (widget.studentId != null) {
       _fetchOtherUser();
+    } else {
+      Future.microtask(() => ref.read(authProvider.notifier).refreshUser());
     }
   }
 
@@ -197,8 +199,8 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> wit
                       Expanded(
                         child: Text(
                           [
-                            if (hasDept) user.department,
-                            if (hasCollege) user.collegeName,
+                            if (hasDept) user?.department,
+                            if (hasCollege) user?.collegeName,
                             if (displayGradYear != null) displayGradYear,
                           ].whereType<String>().join(" • "),
                           style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
