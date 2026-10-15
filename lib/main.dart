@@ -17,7 +17,7 @@ class CodeArenaApp extends ConsumerWidget {
     final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
-      title: 'CodeArena – Learn, Practice & Compete',
+      title: 'Knowiix – Learn, Practice & Compete',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
       theme: AppTheme.lightTheme,

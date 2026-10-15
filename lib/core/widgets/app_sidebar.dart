@@ -111,21 +111,21 @@ class AppSidebar extends StatelessWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: "CODE",
+                              text: "KNOW",
                               style: TextStyle(
                                 color: primaryTextColor,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
-                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 17,
+                                letterSpacing: -0.2,
                               ),
                             ),
                             const TextSpan(
-                              text: "ARENA",
+                              text: "IIX",
                               style: TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
-                                letterSpacing: 0.5,
+                                color: Color(0xFF00A6FF),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 17,
+                                letterSpacing: -0.2,
                               ),
                             ),
                           ],
