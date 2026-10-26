@@ -100,6 +100,32 @@ class LearningHomeScreen extends ConsumerWidget {
                         "Learn syntax step-by-step with interactive executable code blocks, definitions, and direct practice exercises.",
                         style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
                       ),
+                      const SizedBox(height: AppSpacing.space4),
+                      // Stat Cards inside the banner
+                      Row(
+                        children: [
+                          _StatChip(
+                            icon: LucideIcons.bookOpen,
+                            value: "13",
+                            label: "Available Courses",
+                            iconColor: AppColors.primaryLight,
+                          ),
+                          const SizedBox(width: 12),
+                          _StatChip(
+                            icon: LucideIcons.play,
+                            value: "6",
+                            label: "Courses Started",
+                            iconColor: AppColors.secondary,
+                          ),
+                          const SizedBox(width: 12),
+                          _StatChip(
+                            icon: LucideIcons.checkCircle2,
+                            value: "4",
+                            label: "Completed Lessons",
+                            iconColor: AppColors.success,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -271,6 +297,70 @@ class LearningHomeScreen extends ConsumerWidget {
         ],
       ),
       bottomNavigationBar: isMob ? const AppBottomNav(currentRoute: "/student/learning") : null,
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color iconColor;
+
+  const _StatChip({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: iconColor, size: 16),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.white.withOpacity(0.65),
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
