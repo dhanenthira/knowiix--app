@@ -32,17 +32,17 @@ class AppSidebar extends StatelessWidget {
   });
 
   List<SidebarItem> get studentItems => const [
-        SidebarItem(title: "Dashboard", icon: LucideIcons.home, route: "/student/dashboard"),
-        SidebarItem(title: "Learning", icon: LucideIcons.bookOpen, route: "/student/learning"),
-        SidebarItem(title: "Daily Practice", icon: LucideIcons.brain, route: "/student/practice"),
-        SidebarItem(title: "Coding Arena", icon: LucideIcons.code2, route: "/student/coding"),
-        SidebarItem(title: "Communication", icon: LucideIcons.messageSquare, route: "#", isComingSoon: true),
-        SidebarItem(title: "Assessment Tests", icon: LucideIcons.clipboardCheck, route: "/student/tests"),
-        SidebarItem(title: "Battle Rooms", icon: LucideIcons.swords, route: "/student/battles"),
-        SidebarItem(title: "Friends", icon: LucideIcons.users, route: "/student/friends"),
-        SidebarItem(title: "Leaderboard", icon: LucideIcons.trophy, route: "/student/leaderboard"),
-        SidebarItem(title: "Reports & Analytics", icon: LucideIcons.barChart2, route: "/student/reports"),
-        SidebarItem(title: "Profile & Settings", icon: LucideIcons.user, route: "/student/profile"),
+        SidebarItem(title: "Dashboard", icon: AppIcons.home, route: "/student/dashboard"),
+        SidebarItem(title: "Learning & Notes", icon: AppIcons.bookOpen, route: "/student/learning"),
+        SidebarItem(title: "Daily Practice", icon: AppIcons.zap, route: "/student/practice"),
+        SidebarItem(title: "Aptitude Arena", icon: AppIcons.brain, route: "/student/aptitude"),
+        SidebarItem(title: "Technical Arena", icon: AppIcons.code2, route: "/student/coding"),
+        SidebarItem(title: "Assessment Tests", icon: AppIcons.clipboardCheck, route: "/student/tests"),
+        SidebarItem(title: "Battle Rooms", icon: AppIcons.swords, route: "/student/battles"),
+        SidebarItem(title: "Friends", icon: AppIcons.users, route: "/student/friends"),
+        SidebarItem(title: "Leaderboard", icon: AppIcons.trophy, route: "/student/leaderboard"),
+        SidebarItem(title: "Reports & Archive", icon: AppIcons.barChart2, route: "/student/reports"),
+        SidebarItem(title: "Profile & Settings", icon: AppIcons.user, route: "/student/profile"),
       ];
 
   List<SidebarItem> get adminItems => const [

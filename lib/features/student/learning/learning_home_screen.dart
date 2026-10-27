@@ -1,365 +1,463 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontend/core/constants/app_icons.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radii.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_sidebar.dart';
-import '../../../core/widgets/app_header.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_badge.dart';
-import '../../../core/widgets/responsive_layout.dart';
-import '../../../core/services/theme_service.dart';
+import '../../../core/widgets/app_sidebar.dart';
+import 'widgets/explore_topics_track.dart';
 
-class LearningHomeScreen extends ConsumerWidget {
+class LearningHomeScreen extends ConsumerStatefulWidget {
   const LearningHomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = ref.watch(themeProvider) == ThemeMode.dark;
-    final isMob = ResponsiveLayout.isMobile(context);
+  ConsumerState<LearningHomeScreen> createState() => _LearningHomeScreenState();
+}
 
-    final courses = [
-      {
-        "id": "mod_python",
-        "title": "Python Programming",
-        "desc": "Master Python syntax, data structures, OOP and standard libraries with hands-on practice.",
-        "lessons": "4 Lessons",
-        "progress": 0.50,
-        "icon": LucideIcons.code2,
-        "color": AppColors.primary,
-        "tags": ["Beginner", "Popular", "OOP"]
-      },
-      {
-        "id": "mod_dsa",
-        "title": "Data Structures & Algorithms",
-        "desc": "Master Arrays, Linked Lists, Trees, Graphs, Dynamic Programming and Big-O Analysis.",
-        "lessons": "8 Lessons",
-        "progress": 0.25,
-        "icon": LucideIcons.layers,
-        "color": AppColors.secondary,
-        "tags": ["Intermediate", "Interview Prep"]
-      },
-      {
-        "id": "mod_cpp",
-        "title": "C++ for Competitive Programming",
-        "desc": "Standard Template Library (STL), pointers, memory management, and ultra-fast I/O.",
-        "lessons": "6 Lessons",
-        "progress": 0.0,
-        "icon": LucideIcons.cpu,
-        "color": AppColors.accent,
-        "tags": ["Fast Speed", "STL", "Memory"]
-      },
-      {
-        "id": "mod_web",
-        "title": "Full-Stack Web Development",
-        "desc": "HTML5, modern CSS, JavaScript ES6+, RESTful APIs, and backend architecture.",
-        "lessons": "10 Lessons",
-        "progress": 0.10,
-        "icon": LucideIcons.globe,
-        "color": AppColors.warning,
-        "tags": ["Frontend", "Backend", "APIs"]
-      }
-    ];
+class _LearningHomeScreenState extends ConsumerState<LearningHomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String _selectedTopic = 'All';
+  String _searchQuery = '';
 
-    Widget content = SingleChildScrollView(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMob ? AppSpacing.pagePaddingMobile : AppSpacing.pagePaddingDesktop,
-        vertical: AppSpacing.space6,
+  final List<String> _topics = [
+    'All',
+    'Python',
+    'Data Structures',
+    'Algorithms',
+    'JavaScript',
+    'SQL & Databases',
+    'C++',
+    'System Design',
+    'Java Core',
+    'Git & DevOps',
+  ];
+
+  final List<Map<String, dynamic>> _courses = [
+    {
+      'id': 'py_intro',
+      'title': 'Python 3 Mastery',
+      'topic': 'Python',
+      'desc': 'Interactive Python tutorial covering variables, control structures, functions, OOP, and data pipelines.',
+      'lessons': 8,
+      'progress': 0.60,
+      'icon': AppIcons.code2,
+      'color': AppColors.primary,
+      'badge': 'Most Popular',
+    },
+    {
+      'id': 'dsa_arrays',
+      'title': 'Data Structures & Algorithms',
+      'topic': 'Data Structures',
+      'desc': 'Visual interactive guide to Arrays, Linked Lists, Stacks, Queues, Trees, Graphs, and Hash Tables.',
+      'lessons': 12,
+      'progress': 0.35,
+      'icon': AppIcons.layers,
+      'color': AppColors.secondary,
+      'badge': 'High Yield',
+    },
+    {
+      'id': 'js_modern',
+      'title': 'Modern JavaScript ES6+',
+      'topic': 'JavaScript',
+      'desc': 'Arrow functions, Promises, Async/Await, Closures, Prototypes, and DOM manipulation mastery.',
+      'lessons': 10,
+      'progress': 0.20,
+      'icon': AppIcons.zap,
+      'color': AppColors.warning,
+      'badge': 'Frontend',
+    },
+    {
+      'id': 'sql_queries',
+      'title': 'SQL & Database Optimization',
+      'topic': 'SQL & Databases',
+      'desc': 'Relational design, JOIN queries, Window functions, Indexing, and query performance tuning.',
+      'lessons': 6,
+      'progress': 0.0,
+      'icon': AppIcons.barChart2,
+      'color': AppColors.accent,
+      'badge': 'Backend',
+    },
+    {
+      'id': 'cpp_competitive',
+      'title': 'C++ STL & Problem Solving',
+      'topic': 'C++',
+      'desc': 'Vectors, Sets, Maps, Priority Queues, Binary Search, and ultra-fast competitive programming templates.',
+      'lessons': 7,
+      'progress': 0.15,
+      'icon': AppIcons.cpu,
+      'color': AppColors.purple,
+      'badge': 'Placement',
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredCourses = _courses.where((c) {
+      final matchesTopic = _selectedTopic == 'All' || c['topic'] == _selectedTopic;
+      final matchesSearch = _searchQuery.isEmpty ||
+          c['title'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          c['desc'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      return matchesTopic && matchesSearch;
+    }).toList();
+
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: AppColors.background,
+      drawer: const AppSidebar(currentRoute: '/student/learning'),
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(AppIcons.menu, color: AppColors.textPrimary),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(AppIcons.bookOpen, color: AppColors.primary, size: 20),
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'Learning Arena',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(AppIcons.bell, color: AppColors.textMuted),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Banner
-          AppCard(
-            backgroundColor: const Color(0xFF172554), // Dark Navy Blue
-            borderColor: AppColors.primary.withOpacity(0.4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      bottomNavigationBar: const AppBottomNav(currentRoute: '/student/learning'),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Search Bar
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: TextField(
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Search documentation, topics and tutorials...',
+                  hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  prefixIcon: const Icon(AppIcons.search, color: AppColors.textMuted, size: 18),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(AppIcons.x, color: AppColors.textMuted, size: 16),
+                          onPressed: () => setState(() => _searchQuery = ''),
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                ),
+                onChanged: (val) => setState(() => _searchQuery = val),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // W3Schools style horizontal track with non-overlapping < > buttons
+            ExploreTopicsTrack(
+              topics: _topics,
+              selectedTopic: _selectedTopic,
+              onSelectTopic: (topic) => setState(() => _selectedTopic = topic),
+            ),
+            const SizedBox(height: 20),
+
+            // Continue Learning Hero Card
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const AppBadge(
-                        label: "W3SCHOOLS-STYLE LEARNING PATHS",
-                        color: Color(0x223B82F6),
-                        textColor: AppColors.primaryLight,
-                        isPill: true,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'CONTINUE LEARNING',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryLight,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: AppSpacing.space3),
-                      Text(
-                        "Structured Interactive Programming Tracks",
-                        style: AppTypography.h2(context, color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: AppSpacing.space2),
                       const Text(
-                        "Learn syntax step-by-step with interactive executable code blocks, definitions, and direct practice exercises.",
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                      ),
-                      const SizedBox(height: AppSpacing.space4),
-                      // Stat Cards inside the banner
-                      Row(
-                        children: [
-                          _StatChip(
-                            icon: LucideIcons.bookOpen,
-                            value: "13",
-                            label: "Available Courses",
-                            iconColor: AppColors.primaryLight,
-                          ),
-                          const SizedBox(width: 12),
-                          _StatChip(
-                            icon: LucideIcons.play,
-                            value: "6",
-                            label: "Courses Started",
-                            iconColor: AppColors.secondary,
-                          ),
-                          const SizedBox(width: 12),
-                          _StatChip(
-                            icon: LucideIcons.checkCircle2,
-                            value: "4",
-                            label: "Completed Lessons",
-                            iconColor: AppColors.success,
-                          ),
-                        ],
+                        '60% Finished',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryLight,
+                        ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Python 3: Functions & Lambda Expressions',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Lesson 5 of 8 • Scope, recursion, and higher-order functions',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: const LinearProgressIndicator(
+                      value: 0.60,
+                      minHeight: 5,
+                      backgroundColor: AppColors.surfaceElevated,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.push('/student/learning/lesson/py_intro');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(AppIcons.play, size: 14),
+                        SizedBox(width: 6),
+                        Text('Resume Tutorial', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Courses List Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${filteredCourses.length} Interactive Tracks',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  _selectedTopic,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textMuted,
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: AppSpacing.space6),
+            const SizedBox(height: 12),
 
-          // Track List
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Available Learning Tracks", style: AppTypography.h3(context, color: AppColors.textPrimary)),
+            // Course Cards
+            if (filteredCourses.isEmpty)
               Container(
-                width: 220,
-                height: 38,
+                width: double.infinity,
+                padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceElevated,
-                  borderRadius: AppRadii.inputRadius,
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.border),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: const Row(
+                child: const Column(
                   children: [
-                    Icon(LucideIcons.search, size: 16, color: AppColors.textMuted),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
-                        decoration: InputDecoration(
-                          hintText: "Search topics...",
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
+                    Icon(AppIcons.helpCircle, color: AppColors.textMuted, size: 36),
+                    SizedBox(height: 12),
+                    Text('No tutorial tracks found.', style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
+                  ],
+                ),
+              )
+            else
+              ...filteredCourses.map((c) => _buildCourseCard(c)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCourseCard(Map<String, dynamic> c) {
+    final double progress = (c['progress'] as num).toDouble();
+    final Color color = c['color'] as Color;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            context.push('/student/learning/lesson/${c['id']}');
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(c['icon'] as IconData, color: color, size: 20),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Text(
+                        c['badge'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.space4),
-
-          LayoutBuilder(
-            builder: (ctx, constraints) {
-              int crossCount = constraints.maxWidth < 700 ? 1 : 2;
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: crossCount == 1 ? 2.0 : 1.7,
+                const SizedBox(height: 12),
+                Text(
+                  c['title'],
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-                itemCount: courses.length,
-                itemBuilder: (context, idx) {
-                  final c = courses[idx];
-                  final color = c["color"] as Color;
-
-                  return AppCard(
-                    onTap: () => context.go("/student/learning/lesson/py_intro"),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 6),
+                Text(
+                  c['desc'],
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 4,
+                          backgroundColor: AppColors.surfaceElevated,
+                          valueColor: AlwaysStoppedAnimation<Color>(color),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '${(progress * 100).toInt()}%',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: color.withOpacity(0.12),
-                                borderRadius: AppRadii.inputRadius,
-                              ),
-                              child: Icon(c["icon"] as IconData, color: color, size: 22),
-                            ),
-                            const SizedBox(width: AppSpacing.space3),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    c["title"] as String,
-                                    style: AppTypography.h4(context, color: AppColors.textPrimary),
-                                  ),
-                                  Text(
-                                    c["lessons"] as String,
-                                    style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.space3),
+                        const Icon(AppIcons.fileText, size: 13, color: AppColors.textMuted),
+                        const SizedBox(width: 4),
                         Text(
-                          c["desc"] as String,
-                          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const Spacer(),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text("Progress", style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
-                                      Text("${((c["progress"] as double) * 100).toInt()}%",
-                                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: LinearProgressIndicator(
-                                      value: c["progress"] as double,
-                                      minHeight: 6,
-                                      backgroundColor: AppColors.border,
-                                      valueColor: AlwaysStoppedAnimation<Color>(color),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            AppButton(
-                              text: (c["progress"] as double) > 0 ? "Resume" : "Start",
-                              variant: AppButtonVariant.primary,
-                              onPressed: () => context.go("/student/learning/lesson/py_intro"),
-                            ),
-                          ],
+                          '${c['lessons']} Modules',
+                          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                         ),
                       ],
                     ),
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
-    );
-
-    return Scaffold(
-      backgroundColor: isDark ? AppColors.background : AppColors.lightBackground,
-      drawer: isMob ? const Drawer(child: AppSidebar(currentRoute: "/student/learning")) : null,
-      body: Row(
-        children: [
-          if (!isMob) const AppSidebar(currentRoute: "/student/learning"),
-          Expanded(
-            child: Column(
-              children: [
-                AppHeader(
-                  title: "Interactive Learning",
-                  subtitle: "W3Schools-style concept guides with executable examples",
-                  isDarkMode: isDark,
-                  onThemeToggle: () => ref.read(themeProvider.notifier).toggleTheme(),
+                    Row(
+                      children: [
+                        Text(
+                          'Start Reading',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: color,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(AppIcons.arrowRight, size: 14, color: color),
+                      ],
+                    ),
+                  ],
                 ),
-                Expanded(child: content),
               ],
             ),
           ),
-        ],
-      ),
-      bottomNavigationBar: isMob ? const AppBottomNav(currentRoute: "/student/learning") : null,
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-  final Color iconColor;
-
-  const _StatChip({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.18),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: iconColor, size: 16),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 1.1,
-                ),
-              ),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.white.withOpacity(0.65),
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

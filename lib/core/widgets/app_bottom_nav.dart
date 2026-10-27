@@ -19,8 +19,8 @@ class AppBottomNav extends StatelessWidget {
       if (currentRoute.startsWith("/student/dashboard")) return 0;
       if (currentRoute.startsWith("/student/learning")) return 1;
       if (currentRoute.startsWith("/student/practice")) return 2;
-      if (currentRoute.startsWith("/student/coding")) return 3;
-      if (currentRoute.startsWith("/student/battles")) return 4;
+      if (currentRoute.startsWith("/student/aptitude")) return 3;
+      if (currentRoute.startsWith("/student/coding")) return 4;
       return 0;
     }
 
@@ -28,6 +28,13 @@ class AppBottomNav extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         border: Border(top: BorderSide(color: borderColor, width: 1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.25 : 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: BottomNavigationBar(
         currentIndex: getIndex(),
@@ -43,10 +50,10 @@ class AppBottomNav extends StatelessWidget {
               context.go("/student/practice");
               break;
             case 3:
-              context.go("/student/coding");
+              context.go("/student/aptitude");
               break;
             case 4:
-              context.go("/student/battles");
+              context.go("/student/coding");
               break;
           }
         },
@@ -56,15 +63,35 @@ class AppBottomNav extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         selectedFontSize: 11,
         unselectedFontSize: 11,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
         items: const [
-          BottomNavigationBarItem(icon: Icon(LucideIcons.home, size: 20), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.bookOpen, size: 20), label: "Learn"),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.brain, size: 20), label: "Practice"),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.code2, size: 20), label: "Coding"),
-          BottomNavigationBarItem(icon: Icon(LucideIcons.swords, size: 20), label: "Battle"),
+          BottomNavigationBarItem(
+            icon: Icon(AppIcons.home, size: 22),
+            activeIcon: Icon(AppIcons.home, size: 24),
+            label: "Dashboard",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(AppIcons.bookOpen, size: 22),
+            activeIcon: Icon(AppIcons.bookOpen, size: 24),
+            label: "Learning",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(AppIcons.zap, size: 22),
+            activeIcon: Icon(AppIcons.zap, size: 24),
+            label: "Practice",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(AppIcons.brain, size: 22),
+            activeIcon: Icon(AppIcons.brain, size: 24),
+            label: "Aptitude",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(AppIcons.code2, size: 22),
+            activeIcon: Icon(AppIcons.code2, size: 24),
+            label: "Technical",
+          ),
         ],
       ),
     );
   }
 }
-

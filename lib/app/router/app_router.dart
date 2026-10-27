@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/admin_login_screen.dart';
+import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/student/dashboard/student_dashboard_screen.dart';
 import '../../features/student/learning/learning_home_screen.dart';
 import '../../features/student/learning/lesson_viewer_screen.dart';
@@ -18,6 +19,9 @@ import '../../features/student/leaderboard/leaderboard_screen.dart';
 import '../../features/student/reports/student_reports_screen.dart';
 import '../../features/student/profile/student_profile_screen.dart';
 import '../../features/student/friends/student_search_screen.dart';
+import '../../features/student/aptitude/aptitude_home_screen.dart';
+import '../../features/student/aptitude/aptitude_quiz_screen.dart';
+import '../../features/student/aptitude/aptitude_result_screen.dart';
 import '../../features/admin/dashboard/admin_dashboard_screen.dart';
 import '../../features/admin/students/admin_students_screen.dart';
 import '../../features/admin/question_management/admin_questions_screen.dart';
@@ -37,6 +41,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/admin/login',
       builder: (context, state) => const AdminLoginScreen(),
+    ),
+    GoRoute(
+      path: '/auth/forgot-password',
+      builder: (context, state) => const ForgotPasswordScreen(),
     ),
 
     // Student Routes
@@ -66,6 +74,40 @@ final appRouter = GoRouter(
             final cat = state.pathParameters['category'] ?? 'aptitude';
             final timer = state.uri.queryParameters['timer'] != 'false';
             return PracticeSessionScreen(categoryId: cat, timerEnabled: timer);
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/student/aptitude',
+      builder: (context, state) => const AptitudeHomeScreen(),
+      routes: [
+        GoRoute(
+          path: 'quiz',
+          builder: (context, state) {
+            final cat = state.uri.queryParameters['category'] ?? 'All';
+            final startId = state.uri.queryParameters['startId'];
+            final company = state.uri.queryParameters['company'];
+            return AptitudeQuizScreen(
+              category: cat,
+              startId: startId,
+              company: company,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'result',
+          builder: (context, state) {
+            final total = int.tryParse(state.uri.queryParameters['total'] ?? '0') ?? 0;
+            final correct = int.tryParse(state.uri.queryParameters['correct'] ?? '0') ?? 0;
+            final answered = int.tryParse(state.uri.queryParameters['answered'] ?? '0') ?? 0;
+            final category = state.uri.queryParameters['category'] ?? 'Aptitude';
+            return AptitudeResultScreen(
+              total: total,
+              correct: correct,
+              answered: answered,
+              category: category,
+            );
           },
         ),
       ],

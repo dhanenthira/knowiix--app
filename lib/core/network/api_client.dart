@@ -9,10 +9,14 @@ class ApiClient {
   String? authToken;
   
   static String getBaseUrl() {
+    const fromEnv = String.fromEnvironment('API_URL');
+    if (fromEnv.isNotEmpty) {
+      return fromEnv;
+    }
     if (kIsWeb) {
       return "http://localhost:8000/api/v1";
     }
-    return "http://192.168.1.109:8000/api/v1";
+    return "http://192.168.1.106:8000/api/v1";
   }
 
   ApiClient._internal() {

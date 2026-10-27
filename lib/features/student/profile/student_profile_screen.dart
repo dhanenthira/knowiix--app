@@ -199,8 +199,8 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> wit
                       Expanded(
                         child: Text(
                           [
-                            if (hasDept) user?.department,
-                            if (hasCollege) user?.collegeName,
+                            if (hasDept) user.department,
+                            if (hasCollege) user.collegeName,
                             if (displayGradYear != null) displayGradYear,
                           ].whereType<String>().join(" • "),
                           style: const TextStyle(color: AppColors.textMuted, fontSize: 12),

@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontend/core/constants/app_icons.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radii.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_badge.dart';
-import '../../../core/widgets/responsive_layout.dart';
 import '../../../core/network/api_client.dart';
 
 class CodingWorkspaceScreen extends ConsumerStatefulWidget {
@@ -20,18 +14,21 @@ class CodingWorkspaceScreen extends ConsumerStatefulWidget {
   ConsumerState<CodingWorkspaceScreen> createState() => _CodingWorkspaceScreenState();
 }
 
-class _CodingWorkspaceScreenState extends ConsumerState<CodingWorkspaceScreen> with SingleTickerProviderStateMixin {
-  String _selectedLang = "python";
+class _CodingWorkspaceScreenState extends ConsumerState<CodingWorkspaceScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String _selectedLang = 'python';
   late TextEditingController _codeCtrl;
-  final TextEditingController _customInputCtrl = TextEditingController(text: "2 7 11 15\n9");
-  
+  final TextEditingController _customInputCtrl =
+      TextEditingController(text: '2 7 11 15\n9');
+
   bool _isRunning = false;
   bool _isSubmitting = false;
   Map<String, dynamic>? _executionResult;
   bool _showCustomInput = false;
 
   final Map<String, String> _starterCodes = {
-    "python": r'''def two_sum(nums, target):
+    'python': r'''def two_sum(nums, target):
     seen = {}
     for i, num in enumerate(nums):
         diff = target - num
@@ -46,7 +43,7 @@ if lines:
     nums = list(map(int, lines[0].split()))
     target = int(lines[1])
     print(two_sum(nums, target))''',
-    "javascript": r'''const fs = require('fs');
+    'javascript': r'''const fs = require('fs');
 const input = fs.readFileSync(0, 'utf-8').trim().split('\n');
 if (input.length >= 2) {
     const nums = input[0].trim().split(/\s+/).map(Number);
@@ -61,7 +58,7 @@ if (input.length >= 2) {
         map.set(nums[i], i);
     }
 }''',
-    "cpp": r'''#include <iostream>
+    'cpp': r'''#include <iostream>
 #include <vector>
 #include <unordered_map>
 using namespace std;
@@ -89,7 +86,16 @@ int main() {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     _codeCtrl = TextEditingController(text: _starterCodes[_selectedLang]);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _codeCtrl.dispose();
+    _customInputCtrl.dispose();
+    super.dispose();
   }
 
   void _runSampleCode() async {
@@ -99,35 +105,53 @@ int main() {
     });
 
     try {
-      final res = await ApiClient().dio.post("/coding/run", data: {
-        "problem_id": widget.problemId,
-        "language": _selectedLang,
-        "code": _codeCtrl.text,
-        "custom_input": _showCustomInput ? _customInputCtrl.text : null,
+      final res = await ApiClient().dio.post('/coding/run', data: {
+        'problem_id': widget.problemId,
+        'language': _selectedLang,
+        'code': _codeCtrl.text,
+        'custom_input': _showCustomInput ? _customInputCtrl.text : null,
       });
       setState(() {
         _isRunning = false;
         _executionResult = res.data;
       });
     } catch (e) {
-      // Fallback local simulation
+      // Local fallback simulation
       await Future.delayed(const Duration(milliseconds: 600));
       setState(() {
         _isRunning = false;
         _executionResult = {
-          "status": "Accepted",
-          "total_test_cases": 2,
-          "passed_test_cases": 2,
-          "execution_time_ms": 28.4,
-          "memory_used_kb": 1420.0,
-          "stdout": "0 1",
-          "evaluations": [
-            {"test_case_number": 1, "is_hidden": false, "status": "Passed", "input": "2 7 11 15\n9", "expected_output": "0 1", "actual_output": "0 1", "execution_time_ms": 12.0},
-            {"test_case_number": 2, "is_hidden": false, "status": "Passed", "input": "3 2 4\n6", "expected_output": "1 2", "actual_output": "1 2", "execution_time_ms": 16.4}
+          'status': 'Accepted',
+          'total_test_cases': 2,
+          'passed_test_cases': 2,
+          'execution_time_ms': 28.4,
+          'memory_used_kb': 1420.0,
+          'stdout': '0 1',
+          'evaluations': [
+            {
+              'test_case_number': 1,
+              'is_hidden': false,
+              'status': 'Passed',
+              'input': '2 7 11 15\n9',
+              'expected_output': '0 1',
+              'actual_output': '0 1',
+              'execution_time_ms': 12.0
+            },
+            {
+              'test_case_number': 2,
+              'is_hidden': false,
+              'status': 'Passed',
+              'input': '3 2 4\n6',
+              'expected_output': '1 2',
+              'actual_output': '1 2',
+              'execution_time_ms': 16.4
+            }
           ]
         };
       });
     }
+
+    _tabController.animateTo(2); // Switch to Console Tab
   }
 
   void _submitSolution() async {
@@ -137,10 +161,10 @@ int main() {
     });
 
     try {
-      final res = await ApiClient().dio.post("/coding/submit", data: {
-        "problem_id": widget.problemId,
-        "language": _selectedLang,
-        "code": _codeCtrl.text,
+      final res = await ApiClient().dio.post('/coding/submit', data: {
+        'problem_id': widget.problemId,
+        'language': _selectedLang,
+        'code': _codeCtrl.text,
       });
       setState(() {
         _isSubmitting = false;
@@ -151,192 +175,475 @@ int main() {
       setState(() {
         _isSubmitting = false;
         _executionResult = {
-          "status": "Accepted",
-          "total_test_cases": 4,
-          "passed_test_cases": 4,
-          "execution_time_ms": 34.2,
-          "memory_used_kb": 1650.0,
-          "points_awarded": 25,
-          "evaluations": [
-            {"test_case_number": 1, "is_hidden": false, "status": "Passed", "input": "2 7 11 15\n9", "expected_output": "0 1", "actual_output": "0 1", "execution_time_ms": 10.2},
-            {"test_case_number": 2, "is_hidden": false, "status": "Passed", "input": "3 2 4\n6", "expected_output": "1 2", "actual_output": "1 2", "execution_time_ms": 11.5},
-            {"test_case_number": 3, "is_hidden": true, "status": "Passed", "execution_time_ms": 12.5},
-            {"test_case_number": 4, "is_hidden": true, "status": "Passed", "execution_time_ms": 14.0},
+          'status': 'Accepted',
+          'total_test_cases': 4,
+          'passed_test_cases': 4,
+          'execution_time_ms': 34.2,
+          'memory_used_kb': 1650.0,
+          'points_awarded': 25,
+          'evaluations': [
+            {
+              'test_case_number': 1,
+              'is_hidden': false,
+              'status': 'Passed',
+              'input': '2 7 11 15\n9',
+              'expected_output': '0 1',
+              'actual_output': '0 1',
+              'execution_time_ms': 10.2
+            },
+            {
+              'test_case_number': 2,
+              'is_hidden': false,
+              'status': 'Passed',
+              'input': '3 2 4\n6',
+              'expected_output': '1 2',
+              'actual_output': '1 2',
+              'execution_time_ms': 11.5
+            },
+            {
+              'test_case_number': 3,
+              'is_hidden': true,
+              'status': 'Passed',
+              'execution_time_ms': 12.5
+            },
+            {
+              'test_case_number': 4,
+              'is_hidden': true,
+              'status': 'Passed',
+              'execution_time_ms': 14.0
+            },
           ]
         };
       });
     }
+
+    _tabController.animateTo(2); // Switch to Console Tab
   }
 
   @override
   Widget build(BuildContext context) {
-    final isMob = ResponsiveLayout.isMobile(context);
-
-    // Left Panel: Problem Statement
-    Widget problemPanel = Container(
-      color: AppColors.surface,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.space5),
-        child: Column(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(AppIcons.arrowLeft, color: AppColors.textPrimary),
+          onPressed: () => context.go('/student/coding'),
+        ),
+        title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Text("Two Sum Target Indices", style: AppTypography.h2(context, color: AppColors.textPrimary)),
-                const SizedBox(width: 10),
-                AppBadge.difficulty("easy"),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.space3),
-            Wrap(
-              spacing: 8,
-              children: const [
-                AppBadge(label: "Array", isPill: true),
-                AppBadge(label: "Hash Table", isPill: true),
-                AppBadge(label: "Top Interview 150", isPill: true),
-              ],
-            ),
-            const Divider(height: 32),
-
-            // Description
-            Text("Description", style: AppTypography.h3(context, color: AppColors.textPrimary)),
-            const SizedBox(height: AppSpacing.space2),
-            const Text(
-              "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.",
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.6),
-            ),
-            const SizedBox(height: AppSpacing.space5),
-
-            // Examples
-            Text("Example 1:", style: AppTypography.h4(context, color: AppColors.textPrimary)),
-            const SizedBox(height: 6),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.space3),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: AppRadii.cardSmallRadius,
-                border: Border.all(color: AppColors.border),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Input: nums = [2,7,11,15], target = 9", style: TextStyle(fontFamily: 'monospace', color: AppColors.textSecondary, fontSize: 13)),
-                  SizedBox(height: 4),
-                  Text("Output: 0 1", style: TextStyle(fontFamily: 'monospace', color: AppColors.success, fontSize: 13, fontWeight: FontWeight.w700)),
-                  SizedBox(height: 4),
-                  Text("Explanation: Because nums[0] + nums[1] == 9, we return 0 1.", style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
-                ],
+            Text(
+              'Two Sum Target Indices',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: AppSpacing.space5),
-
-            // Constraints
-            Text("Constraints:", style: AppTypography.h4(context, color: AppColors.textPrimary)),
-            const SizedBox(height: 6),
-            const Text("• 2 <= nums.length <= 10^4\n• -10^9 <= nums[i] <= 10^9\n• -10^9 <= target <= 10^9\n• Only one valid answer exists.",
-                style: TextStyle(color: AppColors.textSecondary, fontFamily: 'monospace', fontSize: 13, height: 1.5)),
+            Text(
+              'LeetCode 01 • Arrays & Hash Map',
+              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+            ),
+          ],
+        ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.success.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text(
+              'EASY',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: AppColors.success,
+              ),
+            ),
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: AppColors.primary,
+          indicatorWeight: 3,
+          labelColor: AppColors.primaryLight,
+          unselectedLabelColor: AppColors.textMuted,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          tabs: const [
+            Tab(
+              icon: Icon(AppIcons.fileText, size: 16),
+              text: 'Problem',
+            ),
+            Tab(
+              icon: Icon(AppIcons.terminal, size: 16),
+              text: 'Code Editor',
+            ),
+            Tab(
+              icon: Icon(AppIcons.activity, size: 16),
+              text: 'Console / Tests',
+            ),
           ],
         ),
       ),
-    );
-
-    // Right Panel: Interactive Editor & Output Console
-    Widget editorPanel = Container(
-      color: const Color(0xFF030712), // Deep editor black
-      child: Column(
-        children: [
-          // Editor Top Bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: const Border(top: BorderSide(color: AppColors.border)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
             ),
-            child: Row(
-              children: [
-                // Language Dropdown
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceElevated,
-                    borderRadius: AppRadii.badgeRadius,
-                    border: Border.all(color: AppColors.border),
-                  ),
+          ],
+        ),
+        child: SafeArea(
+          child: Row(
+            children: [
+              // Language Selector
+              Container(
+                height: 38,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceElevated,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: _selectedLang,
-                    underline: const SizedBox(),
                     dropdownColor: AppColors.surfaceElevated,
-                    style: const TextStyle(color: AppColors.primaryLight, fontWeight: FontWeight.w600, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppColors.primaryLight,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                     items: const [
-                      DropdownMenuItem(value: "python", child: Text("Python 3.12")),
-                      DropdownMenuItem(value: "javascript", child: Text("JavaScript (Node.js)")),
-                      DropdownMenuItem(value: "cpp", child: Text("C++ (GCC 14)")),
+                      DropdownMenuItem(value: 'python', child: Text('Python 3')),
+                      DropdownMenuItem(value: 'javascript', child: Text('JS (Node)')),
+                      DropdownMenuItem(value: 'cpp', child: Text('C++ 20')),
                     ],
                     onChanged: (val) {
                       if (val != null) {
                         setState(() {
                           _selectedLang = val;
-                          _codeCtrl.text = _starterCodes[val] ?? "";
+                          _codeCtrl.text = _starterCodes[val] ?? '';
                         });
                       }
                     },
                   ),
                 ),
-                const Spacer(),
+              ),
+              const SizedBox(width: 8),
 
-                // Custom Input toggle
-                TextButton.icon(
-                  icon: Icon(_showCustomInput ? LucideIcons.checkSquare : LucideIcons.square, size: 16, color: AppColors.textMuted),
-                  label: const Text("Custom Input", style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                  onPressed: () => setState(() => _showCustomInput = !_showCustomInput),
-                ),
-                const SizedBox(width: 8),
+              // Reset Code Button
+              IconButton(
+                icon: const Icon(AppIcons.rotateCcw, size: 18, color: AppColors.textMuted),
+                tooltip: 'Reset Starter Code',
+                onPressed: () {
+                  setState(() {
+                    _codeCtrl.text = _starterCodes[_selectedLang] ?? '';
+                  });
+                },
+              ),
+              const Spacer(),
 
-                // Reset code button
-                IconButton(
-                  icon: const Icon(LucideIcons.rotateCcw, size: 16, color: AppColors.textMuted),
-                  tooltip: "Reset Starter Code",
-                  onPressed: () => setState(() => _codeCtrl.text = _starterCodes[_selectedLang] ?? ""),
-                ),
-                const SizedBox(width: 12),
+              // Run Code Button
+              OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.primary),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ).let((style) => OutlinedButton(
+                    style: style,
+                    onPressed: _isRunning ? null : _runSampleCode,
+                    child: _isRunning
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                          )
+                        : const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(AppIcons.play, size: 14, color: AppColors.primaryLight),
+                              SizedBox(width: 4),
+                              Text('Run', style: TextStyle(color: AppColors.primaryLight, fontSize: 13, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                  )),
+              const SizedBox(width: 8),
 
-                // Run & Submit Buttons
-                AppButton(
-                  text: "Run Code",
-                  variant: AppButtonVariant.secondary,
-                  icon: LucideIcons.play,
-                  isLoading: _isRunning,
-                  onPressed: _runSampleCode,
+              // Submit Button
+              ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ).let((style) => ElevatedButton(
+                    style: style,
+                    onPressed: _isSubmitting ? null : _submitSolution,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(AppIcons.send, size: 14),
+                              SizedBox(width: 6),
+                              Text('Submit', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                  )),
+            ],
+          ),
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        physics: const BouncingScrollPhysics(),
+        children: [
+          _buildProblemTab(),
+          _buildEditorTab(),
+          _buildConsoleTab(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProblemTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                const SizedBox(width: 8),
-                AppButton(
-                  text: "Submit",
-                  variant: AppButtonVariant.primary,
-                  icon: LucideIcons.uploadCloud,
-                  isLoading: _isSubmitting,
-                  onPressed: _submitSolution,
+                child: const Text(
+                  'Arrays & Hashing',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryLight,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceElevated,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  'Top Interview 150',
+                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Problem Statement',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.',
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+          ),
+          const SizedBox(height: 20),
+
+          // Example 1
+          const Text(
+            'Example 1:',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Input: nums = [2, 7, 11, 15], target = 9',
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 13, color: AppColors.textSecondary)),
+                SizedBox(height: 4),
+                Text('Output: 0 1',
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.success)),
+                SizedBox(height: 4),
+                Text('Explanation: Because nums[0] + nums[1] == 9, we return indices 0 and 1.',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Example 2
+          const Text(
+            'Example 2:',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Input: nums = [3, 2, 4], target = 6',
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 13, color: AppColors.textSecondary)),
+                SizedBox(height: 4),
+                Text('Output: 1 2',
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.success)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Constraints
+          const Text(
+            'Constraints',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('• 2 <= nums.length <= 10^4',
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: AppColors.textSecondary)),
+                SizedBox(height: 4),
+                Text('• -10^9 <= nums[i] <= 10^9',
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: AppColors.textSecondary)),
+                SizedBox(height: 4),
+                Text('• -10^9 <= target <= 10^9',
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: AppColors.textSecondary)),
+                SizedBox(height: 4),
+                Text('• Only one valid answer exists.',
+                    style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: AppColors.textSecondary)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditorTab() {
+    return Container(
+      color: const Color(0xFF030712),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            color: const Color(0xFF0B1120),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'main.${_getFileExt(_selectedLang)}',
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryLight,
+                  ),
+                ),
+                InkWell(
+                  onTap: () => setState(() => _showCustomInput = !_showCustomInput),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _showCustomInput ? AppIcons.checkSquare : AppIcons.square,
+                        size: 15,
+                        color: AppColors.textMuted,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        'Custom Stdin',
+                        style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-
-          // Code Input Area
+          if (_showCustomInput)
+            Container(
+              height: 70,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              color: const Color(0xFF0F172A),
+              child: TextField(
+                controller: _customInputCtrl,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 12, color: AppColors.textPrimary),
+                decoration: const InputDecoration(
+                  hintText: 'Provide custom stdin input...',
+                  hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
           Expanded(
-            flex: 3,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Line numbers
                 Container(
-                  width: 44,
+                  width: 36,
                   color: const Color(0xFF0B1120),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Column(
-                    children: List.generate(18, (i) => Text("${i + 1}", style: const TextStyle(color: Color(0xFF475569), fontSize: 12, fontFamily: 'monospace', height: 1.5))),
+                    children: List.generate(
+                      18,
+                      (i) => Text(
+                        '${i + 1}',
+                        style: const TextStyle(
+                          color: Color(0xFF475569),
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                // Code TextField
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
@@ -346,14 +653,12 @@ int main() {
                       expands: true,
                       style: const TextStyle(
                         fontFamily: 'monospace',
-                        fontSize: 14,
+                        fontSize: 13,
                         color: Color(0xFFE2E8F0),
                         height: 1.5,
                       ),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
                         filled: false,
                       ),
@@ -363,168 +668,189 @@ int main() {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // Optional Custom Input Box
-          if (_showCustomInput)
+  Widget _buildConsoleTab() {
+    if (_executionResult == null) {
+      return Container(
+        color: AppColors.background,
+        padding: const EdgeInsets.all(32),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceElevated,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(AppIcons.terminal, color: AppColors.textMuted, size: 36),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'No Test Run Yet',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Click "Run" or "Submit" to execute against hidden & public test cases.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted, height: 1.4),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final isPassed = _executionResult!['status'] == 'Accepted';
+    final evaluations = (_executionResult!['evaluations'] as List<dynamic>?) ?? [];
+
+    return Container(
+      color: AppColors.background,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Container(
-              height: 90,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: const BoxDecoration(
-                color: Color(0xFF0F172A),
-                border: Border(top: BorderSide(color: AppColors.border)),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isPassed ? AppColors.success.withOpacity(0.3) : AppColors.error.withOpacity(0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Testcase Stdin Input:", style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
-                  Expanded(
-                    child: TextField(
-                      controller: _customInputCtrl,
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 13, color: AppColors.textPrimary),
-                      decoration: const InputDecoration(border: InputBorder.none, filled: false, contentPadding: EdgeInsets.zero),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: isPassed ? AppColors.success.withOpacity(0.15) : AppColors.error.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(isPassed ? AppIcons.checkCircle : AppIcons.x,
+                                size: 16, color: isPassed ? AppColors.success : AppColors.error),
+                            const SizedBox(width: 6),
+                            Text(
+                              _executionResult!['status'] ?? 'Completed',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: isPassed ? AppColors.success : AppColors.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        '${_executionResult!['execution_time_ms']} ms',
+                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Passed: ${_executionResult!['passed_test_cases']} of ${_executionResult!['total_test_cases']} test cases',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  ),
+                  if (_executionResult!['stdout'] != null) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF030712),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'stdout: ${_executionResult!['stdout']}',
+                        style: const TextStyle(fontFamily: 'monospace', fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-
-          // Bottom Console & Results Area
-          Expanded(
-            flex: 2,
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Color(0xFF0B1120),
-                border: Border(top: BorderSide(color: AppColors.border, width: 1)),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: _executionResult == null
-                  ? const Center(
-                      child: Text(
-                        "Click 'Run Code' or 'Submit' to evaluate your solution against test cases.",
-                        style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: _executionResult!["status"] == "Accepted"
-                                      ? AppColors.success.withOpacity(0.15)
-                                      : AppColors.error.withOpacity(0.15),
-                                  borderRadius: AppRadii.badgeRadius,
-                                ),
-                                child: Text(
-                                  _executionResult!["status"],
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                    color: _executionResult!["status"] == "Accepted" ? AppColors.success : AppColors.error,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Text(
-                                "Passed: ${_executionResult!["passed_test_cases"]} / ${_executionResult!["total_test_cases"]}",
-                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(width: 14),
-                              Text(
-                                "Runtime: ${_executionResult!["execution_time_ms"]} ms",
-                                style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                              ),
-                              if (_executionResult!["points_awarded"] != null && _executionResult!["points_awarded"] > 0) ...[
-                                const Spacer(),
-                                AppBadge(
-                                  label: "+${_executionResult!["points_awarded"]} XP AWARDED",
-                                  color: AppColors.primary.withOpacity(0.15),
-                                  textColor: AppColors.primaryLight,
-                                  isPill: true,
-                                ),
-                              ]
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          if (_executionResult!["evaluations"] != null)
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: (_executionResult!["evaluations"] as List).map((ev) {
-                                final isPassed = ev["status"] == "Passed";
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: isPassed ? AppColors.success.withOpacity(0.1) : AppColors.error.withOpacity(0.1),
-                                    borderRadius: AppRadii.badgeRadius,
-                                    border: Border.all(color: isPassed ? AppColors.success.withOpacity(0.3) : AppColors.error.withOpacity(0.3)),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(isPassed ? LucideIcons.check : LucideIcons.x, size: 14, color: isPassed ? AppColors.success : AppColors.error),
-                                      const SizedBox(width: 6),
-                                      Text("Case ${ev["test_case_number"]}: ${ev["status"]}", style: TextStyle(fontSize: 12, color: isPassed ? AppColors.success : AppColors.error)),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                        ],
+            const SizedBox(height: 16),
+            const Text(
+              'Test Cases Breakdown',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 10),
+            ...evaluations.map((ev) {
+              final evPassed = ev['status'] == 'Passed';
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: evPassed ? AppColors.success.withOpacity(0.2) : AppColors.error.withOpacity(0.2),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(evPassed ? AppIcons.checkCircle : AppIcons.x,
+                            size: 16, color: evPassed ? AppColors.success : AppColors.error),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Test Case ${ev['test_case_number']}',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      ev['execution_time_ms'] != null ? '${ev['execution_time_ms']} ms' : 'Passed',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: evPassed ? AppColors.success : AppColors.error,
                       ),
                     ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        title: Row(
-          children: [
-            Text("Coding Arena • Two Sum Target Indices", style: AppTypography.h4(context, color: AppColors.textPrimary)),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.go("/student/coding"),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: AppColors.divider, height: 1),
-        ),
       ),
-      body: isMob
-          ? DefaultTabController(
-              length: 2,
-              child: Column(
-                children: [
-                  const TabBar(
-                    tabs: [Tab(text: "Problem Statement"), Tab(text: "Code Editor")],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [problemPanel, editorPanel],
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : Row(
-              children: [
-                Expanded(flex: 4, child: problemPanel),
-                Container(width: 1, color: AppColors.border),
-                Expanded(flex: 6, child: editorPanel),
-              ],
-            ),
     );
   }
+
+  String _getFileExt(String lang) {
+    switch (lang) {
+      case 'javascript':
+        return 'js';
+      case 'cpp':
+        return 'cpp';
+      default:
+        return 'py';
+    }
+  }
+}
+
+extension _LetExt<T> on T {
+  R let<R>(R Function(T it) block) => block(this);
 }
