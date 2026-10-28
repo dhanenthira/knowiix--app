@@ -6,11 +6,11 @@ import 'core/services/theme_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: CodeArenaApp()));
+  runApp(const ProviderScope(child: KnowiixApp()));
 }
 
-class CodeArenaApp extends ConsumerWidget {
-  const CodeArenaApp({super.key});
+class KnowiixApp extends ConsumerWidget {
+  const KnowiixApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

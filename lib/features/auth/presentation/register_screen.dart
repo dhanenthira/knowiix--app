@@ -81,7 +81,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 Center(
                   child: Text(
-                    "Join CodeArena",
+                    "Join Knowiix",
                     style: AppTypography.h1(context, color: AppColors.textPrimary),
                   ),
                 ),
@@ -172,7 +172,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(width: 8),
                     const Expanded(
                       child: Text(
-                        "I agree to the CodeArena Terms of Service and Honor Code",
+                        "I agree to the Knowiix Terms of Service and Honor Code",
                         style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
                       ),
                     ),

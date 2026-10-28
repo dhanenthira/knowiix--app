@@ -9,17 +9,17 @@ import 'package:frontend/core/widgets/app_avatar.dart';
 import 'package:frontend/features/auth/presentation/login_screen.dart';
 
 void main() {
-  testWidgets('CodeArena app smoke test loads Student Dashboard by default', (WidgetTester tester) async {
+  testWidgets('Knowiix app smoke test loads Student Dashboard by default', (WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1440, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(const ProviderScope(child: CodeArenaApp()));
+    await tester.pumpWidget(const ProviderScope(child: KnowiixApp()));
     appRouter.go('/student/dashboard');
     await tester.pumpAndSettle();
 
-    expect(find.byType(CodeArenaApp), findsOneWidget);
+    expect(find.byType(KnowiixApp), findsOneWidget);
     expect(find.text("Student Dashboard"), findsWidgets);
-    expect(find.textContaining("CodeArena"), findsWidgets);
+    expect(find.textContaining("Knowiix"), findsWidgets);
   });
 
   testWidgets('LoginScreen renders auth form with proper branding', (WidgetTester tester) async {

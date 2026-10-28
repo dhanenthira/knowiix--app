@@ -361,7 +361,7 @@ class _StudentProfileScreenState extends ConsumerState<StudentProfileScreen> wit
               children: [
                 AppHeader(
                   title: isSelf ? "My Profile" : "$displayName's Profile",
-                  subtitle: "@$displayUsername • CodeArena Developer Portfolio",
+                  subtitle: "@$displayUsername • Knowiix Developer Portfolio",
                   showStreak: true,
                   streakDays: user?.streakDays ?? 0,
                   isDarkMode: isDark,

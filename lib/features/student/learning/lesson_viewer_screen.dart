@@ -201,7 +201,7 @@ class _LessonViewerScreenState extends ConsumerState<LessonViewerScreen> {
                     border: Border.all(color: AppColors.border),
                   ),
                   child: const Text(
-                    "print('Hello, CodeArena Champion!')",
+                    "print('Hello, Knowiix Champion!')",
                     style: TextStyle(fontFamily: 'monospace', color: AppColors.accent, fontSize: 13),
                   ),
                 ),

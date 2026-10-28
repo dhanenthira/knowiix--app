@@ -14,7 +14,9 @@ import '../../../../core/widgets/app_text_field.dart';
 enum ResetStep { enterEmail, enterOtp, newPassword, success }
 
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+  final String? initialEmail;
+  final bool autoSend;
+  const ForgotPasswordScreen({super.key, this.initialEmail, this.autoSend = false});
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -35,6 +37,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   // Countdown timer for OTP expiry
   Timer? _countdownTimer;
   int _secondsRemaining = 600; // 10 minutes
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialEmail != null && widget.initialEmail!.trim().isNotEmpty) {
+      _emailCtrl.text = widget.initialEmail!.trim();
+      if (widget.autoSend) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _handleSendOtp();
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -83,12 +98,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         'email': email,
       });
 
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _currentStep = ResetStep.enterOtp;
         _successMessage = res.data['message'] ?? 'Verification code sent to $email';
       });
       _startTimer();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Verification code (OTP) sent to $email! Please check your inbox.'),
+          backgroundColor: AppColors.success,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     } catch (e) {
       String msg = 'Failed to send reset code. Please ensure the email is registered.';
       if (e is DioException && e.response?.data is Map && e.response?.data['detail'] != null) {
@@ -122,11 +145,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         'otp': otp,
       });
 
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _currentStep = ResetStep.newPassword;
         _successMessage = 'Code verified. Enter your new password below.';
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Code verified! Now choose your new password.'),
+          backgroundColor: AppColors.success,
+          duration: Duration(seconds: 3),
+        ),
+      );
     } catch (e) {
       String msg = 'Invalid or expired verification code.';
       if (e is DioException && e.response?.data is Map && e.response?.data['detail'] != null) {
@@ -371,7 +402,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       case ResetStep.enterEmail:
         return 'Enter your registered Gmail or institutional email address to receive a verification code.';
       case ResetStep.enterOtp:
-        return 'Check your email inbox or spam folder for the 6-digit CodeArena security code.';
+        return 'Check your email inbox or spam folder for the 6-digit Knowiix security code.';
       case ResetStep.newPassword:
         return 'Create a strong, new password with at least 6 characters.';
       case ResetStep.success:
@@ -385,7 +416,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       children: [
         AppTextField(
           label: 'Email Address',
-          hint: 'student@codearena.com',
+          hint: 'student@knowiix.com',
           controller: _emailCtrl,
           prefixIcon: AppIcons.mail,
           keyboardType: TextInputType.emailAddress,

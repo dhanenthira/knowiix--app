@@ -13,7 +13,7 @@ class ApiClient {
     if (fromEnv.isNotEmpty) {
       return fromEnv;
     }
-    if (kIsWeb) {
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.windows) {
       return "http://localhost:8000/api/v1";
     }
     return "http://192.168.1.106:8000/api/v1";

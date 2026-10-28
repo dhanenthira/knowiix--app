@@ -41,7 +41,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const AppBadge(
-                        label: "CODEARENA MASTER ADMIN CONSOLE",
+                        label: "KNOWIIX MASTER ADMIN CONSOLE",
                         color: Color(0x228B5CF6),
                         textColor: AppColors.secondary,
                         isPill: true,
@@ -215,7 +215,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               children: [
                 AppHeader(
                   title: "Admin Dashboard",
-                  subtitle: "CodeArena Central Operational Control",
+                  subtitle: "Knowiix Central Operational Control",
                   showStreak: false,
                   isDarkMode: isDark,
                   onThemeToggle: () => ref.read(themeProvider.notifier).toggleTheme(),

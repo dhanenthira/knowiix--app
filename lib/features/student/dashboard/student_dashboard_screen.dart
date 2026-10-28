@@ -121,7 +121,7 @@ class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen>
                       Text(
                         (user != null && user.streakDays > 0)
                             ? "You're on a ${user.streakDays}-day learning streak! Keep practicing to climb the leaderboard."
-                            : "Welcome to CodeArena! Start practicing questions to build your streak and earn points.",
+                            : "Welcome to Knowiix! Start practicing questions to build your streak and earn points.",
                         style: TextStyle(color: secondaryTextColor, fontSize: 14),
                       ),
                       const SizedBox(height: AppSpacing.space4),
@@ -648,7 +648,7 @@ class _StudentDashboardScreenState extends ConsumerState<StudentDashboardScreen>
               children: [
                 AppHeader(
                   title: "Student Dashboard",
-                  subtitle: "CodeArena Learning & Competition Suite",
+                  subtitle: "Knowiix Learning & Competition Suite",
                   streakDays: user?.streakDays ?? 0,
                   isDarkMode: isDark,
                   onThemeToggle: () => ref.read(themeProvider.notifier).toggleTheme(),

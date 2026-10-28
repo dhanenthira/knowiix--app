@@ -23,6 +23,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _rememberMe = true;
   String? _error;
 
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    super.dispose();
+  }
+
   void _handleLogin() async {
     final email = _emailCtrl.text.trim();
     final pass = _passCtrl.text.trim();
@@ -44,6 +51,122 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final authError = ref.read(authProvider).error;
       setState(() => _error = authError ?? "Invalid email or password.");
     }
+  }
+
+  void _onForgotPassword() {
+    final email = _emailCtrl.text.trim();
+    if (email.isNotEmpty && email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Sending password reset OTP code to $email..."),
+          backgroundColor: AppColors.primary,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      context.push(
+        '/auth/forgot-password?email=' + Uri.encodeComponent(email) + '&autoSend=true',
+        extra: {'email': email, 'autoSend': true},
+      );
+    } else {
+      _showForgotPasswordDialog();
+    }
+  }
+
+  void _showForgotPasswordDialog() {
+    final dialogEmailCtrl = TextEditingController(text: _emailCtrl.text.trim());
+    String? dialogError;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppColors.border),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(LucideIcons.keyRound, color: AppColors.primaryLight, size: 20),
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                "Reset Password",
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Enter your registered email address. A 6-digit OTP code will be sent to your inbox to reset your password.",
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                label: "Email Address",
+                hint: "student@knowiix.com",
+                controller: dialogEmailCtrl,
+                prefixIcon: LucideIcons.mail,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              if (dialogError != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  dialogError!,
+                  style: const TextStyle(color: AppColors.error, fontSize: 12),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text("Cancel", style: TextStyle(color: AppColors.textMuted)),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ),
+              icon: const Icon(LucideIcons.send, size: 16),
+              label: const Text("Send OTP"),
+              onPressed: () {
+                final targetEmail = dialogEmailCtrl.text.trim();
+                if (targetEmail.isEmpty || !targetEmail.contains('@')) {
+                  setDialogState(() {
+                    dialogError = "Please enter a valid email address.";
+                  });
+                  return;
+                }
+                Navigator.of(dialogCtx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Sending password reset code to $targetEmail..."),
+                    backgroundColor: AppColors.primary,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+                context.push(
+                  '/auth/forgot-password?email=' + Uri.encodeComponent(targetEmail) + '&autoSend=true',
+                  extra: {'email': targetEmail, 'autoSend': true},
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -125,7 +248,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: AppSpacing.space1),
                 Center(
                   child: Text(
-                    "Sign in to your CodeArena student account",
+                    "Sign in to your Knowiix student account",
                     style: AppTypography.bodySmall(context, color: AppColors.textMuted),
                   ),
                 ),
@@ -155,7 +278,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Form Fields
                 AppTextField(
                   label: "Email Address",
-                  hint: "student@codearena.com",
+                  hint: "student@knowiix.com",
                   controller: _emailCtrl,
                   prefixIcon: LucideIcons.mail,
                   keyboardType: TextInputType.emailAddress,
@@ -193,7 +316,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ],
                     ),
                     TextButton(
-                      onPressed: () => context.push("/auth/forgot-password"),
+                      onPressed: _onForgotPassword,
                       child: const Text("Forgot password?", style: TextStyle(color: AppColors.primary, fontSize: 13)),
                     ),
                   ],

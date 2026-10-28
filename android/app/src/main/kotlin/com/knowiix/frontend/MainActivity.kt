@@ -1,4 +1,4 @@
-package com.codearena.frontend
+package com.knowiix.frontend
 
 import io.flutter.embedding.android.FlutterActivity
 

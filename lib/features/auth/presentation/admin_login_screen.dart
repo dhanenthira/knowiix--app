@@ -23,6 +23,13 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
   final _passCtrl = TextEditingController();
   String? _error;
 
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    super.dispose();
+  }
+
   void _handleAdminLogin() async {
     final email = _emailCtrl.text.trim();
     final pass = _passCtrl.text.trim();
@@ -38,6 +45,25 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
     } else if (mounted) {
       final authError = ref.read(authProvider).error;
       setState(() => _error = authError ?? "Unauthorized. Admin privileges required.");
+    }
+  }
+
+  void _onForgotPassword() {
+    final email = _emailCtrl.text.trim();
+    if (email.isNotEmpty && email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Sending password reset OTP code to $email..."),
+          backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      context.push(
+        '/auth/forgot-password?email=' + Uri.encodeComponent(email) + '&autoSend=true',
+        extra: {'email': email, 'autoSend': true},
+      );
+    } else {
+      context.push('/auth/forgot-password');
     }
   }
 
@@ -115,7 +141,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
                 AppTextField(
                   label: "Admin Email",
-                  hint: "admin@codearena.com",
+                  hint: "admin@knowiix.com",
                   controller: _emailCtrl,
                   prefixIcon: LucideIcons.mail,
                 ),
@@ -128,12 +154,21 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                   isPassword: true,
                   prefixIcon: LucideIcons.lock,
                 ),
-                const SizedBox(height: AppSpacing.space3),
+                const SizedBox(height: AppSpacing.space2),
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _onForgotPassword,
+                    child: const Text("Forgot admin password?", style: TextStyle(color: AppColors.error, fontSize: 13)),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.space2),
 
                 // Quick Demo Credentials Fill
                 InkWell(
                   onTap: () {
-                    _emailCtrl.text = "admin@codearena.com";
+                    _emailCtrl.text = "admin@knowiix.com";
                     _passCtrl.text = "admin123";
                   },
                   borderRadius: BorderRadius.circular(6),
@@ -151,7 +186,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                         SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            "Fill Demo (admin@codearena.com / admin123)",
+                            "Fill Demo (admin@knowiix.com / admin123)",
                             style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                             overflow: TextOverflow.ellipsis,
                           ),

@@ -58,7 +58,7 @@ class TestResultScreen extends StatelessWidget {
                       Text("Assessment Submitted!", style: AppTypography.h1(context, color: AppColors.textPrimary)),
                       const SizedBox(height: 6),
                       const Text(
-                        "Your responses have been validated and saved on the CodeArena database.",
+                        "Your responses have been validated and saved on the Knowiix database.",
                         style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
                         textAlign: TextAlign.center,
                       ),
